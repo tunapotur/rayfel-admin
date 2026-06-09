@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0f0f11;
+  --bg-card: #17181c;
+  --bg-input: #1e1f25;
+  --border: #2a2b33;
+  --border-focus: #4f6ef7;
+  --text: #e8e9f0;
+  --text-muted: #6b6d7a;
+  --text-subtle: #3d3e47;
+  --accent: #4f6ef7;
+  --accent-hover: #3d5ce6;
+  --accent-dim: rgba(79, 110, 247, 0.12);
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent-dim); color: var(--accent); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Quill overrides */
+.ql-toolbar.ql-snow {
+  background: var(--bg-input) !important;
+  border-color: var(--border) !important;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0 !important;
+  padding: 10px 12px !important;
+}
+.ql-container.ql-snow {
+  background: var(--bg-input) !important;
+  border-color: var(--border) !important;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm) !important;
+  min-height: 320px;
+  font-size: 15px;
+  color: var(--text) !important;
+}
+.ql-editor { min-height: 320px; color: var(--text); padding: 16px; }
+.ql-editor.ql-blank::before { color: var(--text-muted) !important; font-style: normal !important; }
+.ql-snow .ql-stroke { stroke: var(--text-muted) !important; }
+.ql-snow .ql-fill { fill: var(--text-muted) !important; }
+.ql-snow .ql-picker { color: var(--text-muted) !important; }
+.ql-snow .ql-picker-options { background: var(--bg-card) !important; border-color: var(--border) !important; }
+.ql-snow button:hover .ql-stroke,
+.ql-snow .ql-active .ql-stroke { stroke: var(--accent) !important; }
+.ql-snow button:hover .ql-fill,
+.ql-snow .ql-active .ql-fill { fill: var(--accent) !important; }
+.ql-snow button:hover, .ql-snow .ql-active { color: var(--accent) !important; }
+
+/* Content list hover */
+.content-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition: background .12s, border-color .12s;
+}
+.content-row:hover {
+  background: var(--bg-card);
+  border-color: var(--border);
+}
