@@ -17,8 +17,16 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
+    // Meta
+    title: content.title,
+    description: content.description,
+    language: content.language,
+    date: content.date,
+    newsType: content.newsType,
+    // Dosyalar
     files: content.files || [],
     headline_image: content.headline_image || "",
+    // İçerik
     mainText: content.mainText || "",
   });
 }

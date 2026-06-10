@@ -46,7 +46,7 @@ function ContentRow({
 }) {
   return (
     <Link
-      href={`/compose/${c.slug}/editor?type=${c.type}`}
+      href={`/compose?slug=${c.slug}&type=${c.type}&edit=true`}
       style={{ textDecoration: "none" }}
     >
       <div className="content-row">
