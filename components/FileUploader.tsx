@@ -214,18 +214,12 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
 
   /* Saved dosyayı headline yap (önce eskisini sıfırla) */
   const setSavedHeadline = async (saved: SavedFile) => {
-    // Diğer saved headline'ı kaldır
-    const oldHeadline = files.find((f) => f.kind === "saved" && f.isHeadline && f.path !== saved.path);
-    if (oldHeadline && oldHeadline.kind === "saved") {
-      await deleteSaved({ ...oldHeadline, isHeadline: true });
-    }
-    // Bu dosyayı headline olarak işaretle
+    // Eski headline'ı silmeden sadece state ve JSON'u güncelle
     setFiles((prev) => prev.map((f) =>
       f.kind === "saved"
         ? { ...f, isHeadline: f.path === saved.path }
         : { ...f, isHeadline: false }
     ));
-    // JSON güncelle — headline_image değiştir
     await fetch("/api/set-headline", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -575,7 +569,7 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
             fontFamily: "inherit",
           }}
         >
-          {pendingCount === 0 ? "Devam →" : "Atla →"}
+          {"Atla →"}
         </button>
 
         {isEdit && (
