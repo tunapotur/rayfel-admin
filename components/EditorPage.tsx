@@ -73,7 +73,7 @@ export default function EditorPage({ slug, type }: EditorPageProps) {
 
   // Mevcut içeriği yükle
   useEffect(() => {
-    fetch(`/api/list-files?type=${type}&slug=${slug}`)
+    fetch(`/api/list-files?slug=${slug}`)
       .then((r) => r.json())
       .then((data) => {
         if (data.success) {
@@ -132,7 +132,7 @@ export default function EditorPage({ slug, type }: EditorPageProps) {
       const res = await fetch("/api/save-content", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type, slug, mainText: cleanHtml }),
+        body: JSON.stringify({ slug, mainText: cleanHtml }),
       });
       const data = await res.json();
       if (!data.success) throw new Error(data.error);

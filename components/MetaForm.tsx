@@ -32,7 +32,7 @@ export default function MetaForm({ slug: initialSlug, type: initialType, isEdit 
   const [newsType, setNewsType] = useState<"news" | "mobility" | "dissemination">("news");
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState(initialSlug || "");
-  const [slugManual, setSlugManual] = useState(isEdit || false);
+  const [slugManual, setSlugManual] = useState(false);
   const [description, setDescription] = useState("");
   const [language, setLanguage] = useState<"tr" | "en" | "de">("tr");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -47,7 +47,7 @@ export default function MetaForm({ slug: initialSlug, type: initialType, isEdit 
   // Edit modunda mevcut veriyi çek
   useEffect(() => {
     if (!isEdit || !initialSlug || !initialType) return;
-    fetch(`/api/list-files?type=${initialType}&slug=${initialSlug}`)
+    fetch(`/api/list-files?slug=${initialSlug}`)
       .then((r) => r.json())
       .then((data) => {
         if (!data.success) return;
@@ -60,23 +60,23 @@ export default function MetaForm({ slug: initialSlug, type: initialType, isEdit 
       });
   }, [isEdit, initialSlug, initialType]);
 
-  // Auto-slug (sadece yeni içerikte)
+  // Auto-slug — yeni içerikte ve edit modunda başlık değişince
   useEffect(() => {
-    if (!slugManual && title && !isEdit) {
+    if (!slugManual && title) {
       setSlug(generateSlug(title));
     }
-  }, [title, slugManual, isEdit]);
+  }, [title, slugManual]);
 
   // Conflict check (debounced) — edit modunda slug değişmediği için sadece başlık kontrol et
   useEffect(() => {
     if (!slug || !title) { setSlugConflict(null); setTitleConflict(null); return; }
-    if (isEdit) { setSlugConflict(null); setTitleConflict(null); return; } // edit'te conflict yok
+
     setChecking(true);
     const t = setTimeout(async () => {
       const res = await fetch("/api/check-duplicate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ slug, title, type }),
+        body: JSON.stringify({ slug, title, type, originalSlug: isEdit ? initialSlug : undefined }),
       });
       const data = await res.json();
       setSlugConflict(data.conflict === "slug" ? data.message : null);
@@ -104,6 +104,7 @@ export default function MetaForm({ slug: initialSlug, type: initialType, isEdit 
           date: formatDateTR(date),
           slug,
           isEdit: isEdit || false,
+          originalSlug: isEdit ? initialSlug : undefined,
         }),
       });
       const data = await res.json();
@@ -204,17 +205,13 @@ export default function MetaForm({ slug: initialSlug, type: initialType, isEdit 
                 ↺ Sıfırla
               </button>
             )}
-            {isEdit && (
-              <span style={{ marginLeft: 8, fontSize: 11, color: "var(--text-subtle)", fontWeight: 400 }}>
-                (değiştirilemez)
-              </span>
-            )}
+
           </label>
           <div style={{ position: "relative" }}>
             <input
               value={slug}
-              onChange={(e) => { if (!isEdit) { setSlugManual(true); setSlug(e.target.value); } }}
-              readOnly={isEdit}
+              onChange={(e) => { setSlugManual(true); setSlug(e.target.value); }}
+
               placeholder="otomatik-olusturulur"
               style={{
                 ...inputStyle,
@@ -222,10 +219,9 @@ export default function MetaForm({ slug: initialSlug, type: initialType, isEdit 
                 fontSize: 13,
                 borderColor: slugConflict ? "var(--danger)" : "var(--border)",
                 paddingRight: 60,
-                cursor: isEdit ? "default" : "text",
-                opacity: isEdit ? 0.6 : 1,
+
               }}
-              onFocus={(e) => { if (!isEdit) e.target.style.borderColor = "var(--border-focus)"; }}
+              onFocus={(e) => (e.target.style.borderColor = slugConflict ? "var(--danger)" : "var(--border-focus)")}
               onBlur={(e) => { e.target.style.borderColor = slugConflict ? "var(--danger)" : "var(--border)"; }}
             />
             {!isEdit && (

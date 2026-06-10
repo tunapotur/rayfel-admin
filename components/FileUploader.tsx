@@ -20,7 +20,7 @@ interface PendingFile {
 /** Daha önce yüklenmiş, JSON'da kayıtlı dosya */
 interface SavedFile {
   kind: "saved";
-  id: number;
+  id: string;
   name: string;
   alt: string;
   path: string;
@@ -119,16 +119,8 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
         if (!data.success) return;
         const saved: SavedFile[] = [];
 
-        if (data.headline_image) {
-          saved.push({
-            kind: "saved",
-            id: -1,
-            name: data.headline_image.split("/").pop() || "headline",
-            alt: "Kapak Görseli",
-            path: data.headline_image,
-            isHeadline: true,
-          });
-        }
+        // files[] içindeki headline path'ini bul (varsa)
+        const headlinePath = data.headline_image || "";
         (data.files as FileItem[]).forEach((f) => {
           saved.push({
             kind: "saved",
@@ -136,9 +128,20 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
             name: f.name,
             alt: f.alt,
             path: f.path,
-            isHeadline: false,
+            isHeadline: !!headlinePath && f.path === headlinePath,
           });
         });
+        // files[] içinde yoksa ayrıca ekle (eski veri uyumu)
+        if (headlinePath && !(data.files as FileItem[]).some((f: FileItem) => f.path === headlinePath)) {
+          saved.unshift({
+            kind: "saved",
+            id: "headline",
+            name: headlinePath.split("/").pop() || "headline",
+            alt: "Kapak Görseli",
+            path: headlinePath,
+            isHeadline: true,
+          });
+        }
         setFiles(saved);
         setLoading(false);
       });
@@ -173,7 +176,7 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          type, slug,
+          slug,
           filePath: saved.path,
           isHeadline: saved.isHeadline,
         }),
@@ -223,7 +226,7 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
     await fetch("/api/set-headline", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type, slug, filePath: saved.path }),
+      body: JSON.stringify({ slug, filePath: saved.path }),
     });
   };
 
@@ -253,7 +256,6 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
 
       setProgress("Yükleniyor...");
       const formData = new FormData();
-      formData.append("type", type);
       formData.append("slug", slug);
 
       // Headline önce
@@ -267,7 +269,7 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
         JSON.stringify(sorted.map(({ pf }) => ({
           name: pf.name,
           alt: pf.alt,
-          originalName: pf.file.name,
+          originalName: pf.file.name, // uzantı için hâlâ gerekli
         })))
       );
       sorted.forEach(({ resized: r }) => formData.append("files", r));
@@ -324,7 +326,7 @@ export default function FileUploader({ slug, type, isEdit }: FileUploaderProps) 
             {files
               .filter((f): f is SavedFile => f.kind === "saved")
               .map((f) => (
-                <div key={f.path} style={{
+                <div key={f.id} style={{
                   display: "grid",
                   gridTemplateColumns: "44px 1fr auto auto",
                   gap: 10, alignItems: "center",

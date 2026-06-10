@@ -4,19 +4,15 @@ import { ContentMeta } from "@/lib/types";
 import Link from "next/link";
 
 function getAllContent(): ContentMeta[] {
-  const types = ["news", "announcements"];
-  const all: ContentMeta[] = [];
-  for (const type of types) {
-    try {
-      all.push(...readAllContents(type));
-    } catch {}
+  try {
+    return readAllContents().sort((a, b) => a.id > b.id ? -1 : 1);
+  } catch {
+    return [];
   }
-  return all.sort((a, b) => b.id - a.id);
 }
 
 export default function HomePage() {
-  let contents: ContentMeta[] = [];
-  try { contents = getAllContent(); } catch {}
+  const contents = getAllContent();
 
   return (
     <div>

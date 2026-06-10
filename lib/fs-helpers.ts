@@ -12,61 +12,75 @@ export function getDataDir(): string {
   return path.join(getProjectPath(), "data");
 }
 
-/** data/news.json veya data/announcements.json */
-export function getJsonPath(type: string): string {
-  return path.join(getDataDir(), `${type}.json`);
+/** Tek veri dosyası: data/content-data.json */
+export function getJsonPath(): string {
+  return path.join(getDataDir(), "content-data.json");
 }
 
-export function getUploadsDir(slug: string): string {
-  return path.join(getProjectPath(), "public", "uploads", slug);
+/** uploads/[contentId]/ klasörü */
+export function getUploadsDir(contentId: string): string {
+  return path.join(getProjectPath(), "public", "uploads", contentId);
 }
 
 export function ensureDir(dirPath: string): void {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
-/** Tüm içerikleri oku (type = "news" | "announcements") */
-export function readAllContents(type: string): ContentMeta[] {
+/** Tüm içerikleri oku */
+export function readAllContents(): ContentMeta[] {
   try {
-    const raw = fs.readFileSync(getJsonPath(type), "utf-8");
+    const raw = fs.readFileSync(getJsonPath(), "utf-8");
     return JSON.parse(raw) as ContentMeta[];
   } catch {
     return [];
   }
 }
 
-/** Tek bir slug'a ait içeriği oku */
-export function readContent(type: string, slug: string): ContentMeta | null {
-  const all = readAllContents(type);
-  return all.find((c) => c.slug === slug) ?? null;
+/** type'a göre filtreli içerikler */
+export function readContentsByType(type: string): ContentMeta[] {
+  return readAllContents().filter((c) => c.type === type);
+}
+
+/** Slug ile içerik bul */
+export function readContent(slug: string): ContentMeta | null {
+  return readAllContents().find((c) => c.slug === slug) ?? null;
+}
+
+/** id ile içerik bul */
+export function readContentById(id: string): ContentMeta | null {
+  return readAllContents().find((c) => c.id === id) ?? null;
 }
 
 /** Tüm array'i diske yaz */
-export function writeAllContents(type: string, contents: ContentMeta[]): void {
+export function writeAllContents(contents: ContentMeta[]): void {
   ensureDir(getDataDir());
-  fs.writeFileSync(getJsonPath(type), JSON.stringify(contents, null, 2), "utf-8");
+  fs.writeFileSync(getJsonPath(), JSON.stringify(contents, null, 2), "utf-8");
 }
 
-/** Tek bir içeriği ekle veya güncelle (slug bazlı upsert) */
-export function upsertContent(type: string, updated: ContentMeta): void {
-  const all = readAllContents(type);
+/** Upsert — slug bazlı */
+export function upsertContent(updated: ContentMeta): void {
+  const all = readAllContents();
   const idx = all.findIndex((c) => c.slug === updated.slug);
   if (idx >= 0) {
     all[idx] = updated;
   } else {
     all.push(updated);
   }
-  writeAllContents(type, all);
+  writeAllContents(all);
 }
 
-/** Sonraki id'yi hesapla */
-export function getNextId(type: string): number {
-  const all = readAllContents(type);
-  if (all.length === 0) return 0;
-  return Math.max(...all.map((c) => c.id ?? 0)) + 1;
+/** Slug ile sil */
+export function removeContent(slug: string): void {
+  writeAllContents(readAllContents().filter((c) => c.slug !== slug));
 }
 
-/** Tüm slug'ları döndür */
-export function getAllSlugs(type: string): string[] {
-  return readAllContents(type).map((c) => c.slug);
+/** Tüm slug listesi */
+export function getAllSlugs(): string[] {
+  return readAllContents().map((c) => c.slug);
+}
+
+/** uploads/[contentId]/ klasöründe aynı isimde dosya var mı? */
+export function fileExistsInUploads(contentId: string, fileName: string): boolean {
+  const filePath = path.join(getUploadsDir(contentId), fileName);
+  return fs.existsSync(filePath);
 }
