@@ -145,12 +145,19 @@ export default function EditorPage({ slug, type }: EditorPageProps) {
     }
   };
 
-  const allImages = [
-    ...(headlineImage ? [{ path: headlineImage, alt: "Kapak Görseli", name: "headline" }] : []),
-    ...files.filter((f) => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.path)).map((f) => ({
-      path: f.path, alt: f.alt, name: f.name,
-    })),
-  ];
+  const allImages = files
+    .filter((f) => /\.(jpg|jpeg|png|webp|gif)$/i.test(f.path))
+    .map((f) => ({
+      id: f.id,
+      path: f.path,
+      alt: f.alt,
+      name: f.name,
+      isHeadline: !!headlineImage && f.path === headlineImage,
+    }));
+  // Headline dosyası files[]'da yoksa (eski veri) ayrıca ekle
+  if (headlineImage && !allImages.some((img) => img.path === headlineImage)) {
+    allImages.unshift({ id: "headline", path: headlineImage, alt: "Kapak Görseli", name: "headline", isHeadline: true });
+  }
 
   const allDocs = files.filter((f) => /\.pdf$/i.test(f.path));
 
@@ -222,7 +229,7 @@ export default function EditorPage({ slug, type }: EditorPageProps) {
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 6 }}>
                     {allImages.map((img) => (
                       <button
-                        key={img.path}
+                        key={img.id}
                         onClick={() => insertImage(img.path)}
                         title={`Ekle: ${img.alt}`}
                         style={{
