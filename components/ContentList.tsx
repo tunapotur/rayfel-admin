@@ -7,7 +7,7 @@ const typeLabel: Record<string, string> = {
   news: "Haber",
   mobility: "Hareketlilik",
   dissemination: "Yaygınlaştırma",
-  announcements: "Duyuru",
+  announcement: "Duyuru",
 };
 
 function statusBadge(content: ContentMeta) {

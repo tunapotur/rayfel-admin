@@ -1,4 +1,4 @@
-export type ContentType = "news" | "announcements";
+export type ContentType = "news" | "announcement";
 export type NewsType = "news" | "mobility" | "dissemination";
 export type LanguageType = "tr" | "en" | "de";
 

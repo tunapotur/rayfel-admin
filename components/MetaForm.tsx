@@ -28,7 +28,7 @@ interface MetaFormProps {
 export default function MetaForm({ slug: initialSlug, type: initialType, isEdit }: MetaFormProps) {
   const router = useRouter();
 
-  const [type, setType] = useState<"news" | "announcements">((initialType as "news" | "announcements") || "news");
+  const [type, setType] = useState<"news" | "announcement">((initialType as "news" | "announcement") || "news");
   const [newsType, setNewsType] = useState<"news" | "mobility" | "dissemination">("news");
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState(initialSlug || "");
@@ -157,7 +157,7 @@ export default function MetaForm({ slug: initialSlug, type: initialType, isEdit 
               style={{ ...inputStyle, cursor: isEdit ? "not-allowed" : "pointer", opacity: isEdit ? 0.5 : 1 }}
             >
               <option value="news">Haber</option>
-              <option value="announcements">Duyuru</option>
+              <option value="announcement">Duyuru</option>
             </select>
           </div>
           {type === "news" && (
