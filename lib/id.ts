@@ -15,8 +15,12 @@ export function generateContentId(type: string): string {
   return `${type}-${yil}-${ay}-${gun}_${saat}-${dakika}-${saniye}-${milisaniye}`;
 }
 
+// Aynı süreçte birden fazla çağrıda çakışmayı önlemek için sayaç
+let fileIdCounter = 0;
+
 /**
- * Dosya için unique ID üretir — içerik ID'siyle aynı format ama "file" prefix'li
+ * Dosya için unique ID üretir.
+ * Aynı milisaniyede birden fazla çağrılsa bile sayaç ile unique kalır.
  */
 export function generateFileId(): string {
   const now = new Date();
@@ -27,5 +31,6 @@ export function generateFileId(): string {
   const dakika = String(now.getMinutes()).padStart(2, "0");
   const saniye = String(now.getSeconds()).padStart(2, "0");
   const milisaniye = String(now.getMilliseconds()).padStart(3, "0");
-  return `file-${yil}-${ay}-${gun}_${saat}-${dakika}-${saniye}-${milisaniye}`;
+  const seq = String(fileIdCounter++).padStart(3, "0");
+  return `file-${yil}-${ay}-${gun}_${saat}-${dakika}-${saniye}-${milisaniye}-${seq}`;
 }
